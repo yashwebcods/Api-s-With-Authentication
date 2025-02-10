@@ -1,11 +1,34 @@
 const UserModel = require('../model/UserModel')
 const path = require('path')
 const fs = require('fs')
-const { log } = require('console')
 
 module.exports.home = async (req, res) => {
     try {
-        const UserData = await UserModel.find()
+        console.log(req.query);
+        let search = '';
+        let PerPage = 1;
+        let page = 0
+       
+        if (req.query.page) {
+            page = req.query.page
+        }
+
+        if (req.query.search) {
+            search = req.query.search
+        }
+        const UserData = await UserModel.find({
+            $or:[
+                {'username':{$regex:search}}
+            ]
+        }).skip(PerPage * page).limit(PerPage)
+
+        const total = await UserModel.find({
+            $or:[
+                {'username':{$regex:search}}
+            ]
+        }).countDocuments() 
+        console.log(Math.ceil(total/PerPage));
+        
         return res.status(200).json({ msg: 'HEllo', data: UserData })
     }
     catch (err) {
@@ -16,7 +39,7 @@ module.exports.home = async (req, res) => {
 module.exports.AddData = async (req, res) => {
     try {
 
-        // console.log(req.file);
+
         req.body.image = UserModel.imgPath + '/' + req.file.filename
 
         let UserData = await UserModel.create(req.body)
@@ -102,6 +125,31 @@ module.exports.UpdateUser = async (req, res) => {
             return res.status(200).json({ msg: 'User not found' })
         }
 
+    } catch (err) {
+        return res.status(400).json({ msg: 'Somthing Wrong', data: err })
+    }
+}
+
+module.exports.UpdateSattus = async (req, res) => {
+    try {
+        let userData = await UserModel.findById(req.query.userId)
+        let status = req.query.userStatus
+        if (userData) {
+            console.log('hi');
+            if (status == "false") {
+                userData.status = false
+            } else {
+                userData.status = true
+            }
+            let isUpdated = await UserModel.findByIdAndUpdate(req.query.userId, userData)
+            if (isUpdated) {
+                return res.status(200).json({ mes: "Status Updated" })
+            } else {
+                return res.status(200).json({ mes: "Status Not Updated" })
+            }
+        } else {
+            return res.status(200).json({ mes: "Record Not Found" })
+        }
     } catch (err) {
         return res.status(400).json({ msg: 'Somthing Wrong', data: err })
     }

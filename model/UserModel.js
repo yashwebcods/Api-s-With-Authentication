@@ -27,6 +27,10 @@ const UserSchema = mongoose.Schema({
     gender:{
         type:String,
         required:true
+    },
+    status:{
+        type:Boolean,
+        require:true
     }
 },{
     timestamps:true

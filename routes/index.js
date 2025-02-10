@@ -13,4 +13,5 @@ Routes.delete('/deleteUser/:id',UserCtl.deleteData)
 Routes.get('/getUpdateData/:id', UserCtl.GetUpdateData)
 Routes.patch('/updateUser/:id' , UserModel.uploadImage ,  UserCtl.UpdateUser)
 Routes.use('/auth' , require('./Auth'))
+Routes.get('/changeStatus' , UserCtl.UpdateSattus)
 module.exports = Routes;
